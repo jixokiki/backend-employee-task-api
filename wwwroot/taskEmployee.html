@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    ul { list-style: none; padding-left: 0; }
+    li { padding: 5px 0; border-bottom: 1px solid #ddd; }
+</style>
+</head>
+<body>
+<h1>Task Dashboard</h1>
+<ul id="taskList"></ul>
+
+<script>
+(async () => {
+    const hubUrl = "/taskHub"; // relative URL karena frontend dan backend sama origin
+    const apiUrl = "/api/tasks"; 
+
+    // Hub connection
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl)
+        .build();
+
+    // Start SignalR
+    try {
+        await connection.start();
+        console.log("Connected to SignalR Hub");
+    } catch (err) {
+        console.error("SignalR connection failed:", err.toString());
+    }
+
+    // Receive notifications
+    connection.on("ReceiveTask", message => addTaskToList(message));
+
+    // Add task to list
+    function addTaskToList(text) {
+        const li = document.createElement("li");
+        li.textContent = text;
+        document.getElementById("taskList").appendChild(li);
+    }
+
+    // Fetch existing tasks
+    try {
+        const res = await fetch(apiUrl);
+        const tasks = await res.json();
+        tasks.forEach(task => addTaskToList(`${task.title} - ${task.status}`));
+    } catch (err) {
+        console.error("Failed to fetch tasks:", err);
+    }
+})();
+</script>
+</body>
+</html>

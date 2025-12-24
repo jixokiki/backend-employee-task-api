@@ -1,0 +1,12 @@
+# ASP.NET secrets
+appsettings.Development.json
+
+# Frontend terpisah
+EmployeeTaskApiFrontend/
+
+# Build
+bin/
+obj/
+
+# OS
+.DS_Store
